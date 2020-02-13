@@ -14,16 +14,20 @@ import * as rtl from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import App from './App';
 import StarWarsCharacters from './components/StarWarsCharacters';
+
 jest.useFakeTimers();
 afterEach(rtl.cleanup);
+afterEach(() => {
+    jest.clearAllMocks();
+});
 
 jest.mock('axios', () =>{
     return {
         get: jest.fn(() => Promise.resolve({
           data: {
             count: 0,
-            next: '',
-            previous: null,
+            next: 'https://swapi.co/api/people/?page=2',
+            previous: false,
             results: [ {} ]
           }
         }))
@@ -31,19 +35,13 @@ jest.mock('axios', () =>{
 })
 
 it('Renders Header', () =>{
-    let wrapper
-    act(() =>{  
-        wrapper = rtl.render(<App />);
-    })
-    
+    const wrapper = rtl.render(<App />);
     expect(wrapper.getByTestId(/header/i));
 })
 
 it('Made API call', async () => {
     const wrapper = rtl.render(<App />);
-    
     await wrapper.findAllByTestId(/char/i);
-    
     expect(axios.get).toHaveBeenCalled();
 })
 
@@ -52,21 +50,24 @@ it('Loads the API', async () => {
     console.log(data);
     jest.runAllTimers();
     expect(data).toBeDefined();
-    expect(data.previous).toBeNull();
-});
+    expect(data.previous).toBeFalsy();
+})
 
-it('Fires Next Button Call', async () =>{
+it('Fires Next Button Call', () =>{
     const wrapper = render(<StarWarsCharacters />);
-    const prevButton = wrapper.getByTestId('prevButton');
     const nextButton = wrapper.getByTestId('nextButton');
-    expect(prevButton).toBeDisabled();
     act(() =>{
        fireEvent.click(nextButton, {button: 1});
-       wrapper.rerender();
     });
-    expect(prevButton).not.toBeDisabled();
+    expect(axios.get).toHaveBeenCalledTimes(1);
 })
 
 it('Fires Prev Button Call', () =>{
-
+    const wrapper = render(<StarWarsCharacters />);
+    const prevButton = wrapper.getByTestId('prevButton');
+    expect(prevButton).toBeDisabled();
+    act(() =>{
+       fireEvent.click(prevButton, {button: 1});
+    });
+    expect(axios.get).toHaveBeenCalledTimes(1);
 })
