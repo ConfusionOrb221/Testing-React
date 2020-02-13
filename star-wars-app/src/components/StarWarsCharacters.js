@@ -46,15 +46,16 @@ export default function StarWarsCharacters() {
       ) : (
         <>
           {characters.map(character => (
-            <div key={character.url}>{character.name}</div>
+            <div key={character.url} data-testid="char">{character.name}</div>
           ))}
         </>
       )}
       <div className="buttons">
-        <button onClick={goToPrevious} disabled={!previous}>
+        {console.log(!previous)}
+        <button onClick={goToPrevious} disabled={!previous} data-testid="prevButton">
           Previous
         </button>
-        <button onClick={goToNext} disabled={!next}>
+        <button onClick={goToNext} disabled={!next} data-testid="nextButton">
           Next
         </button>
       </div>
